@@ -18,8 +18,8 @@ main()
 	nasm -I ../includes/ -felf64 -o $WORK_FOLDER/TMP_main_without_anti_debugging2.o $WORK_FOLDER/TMP_main_without_anti_debugging.s && ld -o $WORK_FOLDER/TMP_main_without_anti_debugging2.elf $WORK_FOLDER/TMP_main_without_anti_debugging2.o
 	nasm -I ../includes/ -felf64 -o $WORK_FOLDER/TMP_main_without_uncipher2.o $WORK_FOLDER/TMP_main_without_uncipher.s && ld -o $WORK_FOLDER/TMP_main_without_uncipher2.elf $WORK_FOLDER/TMP_main_without_uncipher2.o
 
-	start_address=$(nm $WORK_FOLDER/TMP_main_without_anti_debugging2.elf | grep "can_run_infection.TMP_uncipher" | cut -d ' ' -f1 | sed -E 's/^0*([^0][0-9a-z]*)$/0x\1/')
-	stop_address=$(nm $WORK_FOLDER/TMP_main_without_anti_debugging2.elf | grep "can_run_infection.TMP_END_uncipher" | cut -d ' ' -f1 | sed -E 's/^0*([^0][0-9a-z]*)$/obase=16;ibase=16;\U\1+1/' | bc | sed 's/^/0x/')
+	start_address=$(nm $WORK_FOLDER/TMP_main_without_anti_debugging2.elf | grep "can_run_infection.begin_uncipher" | cut -d ' ' -f1 | sed -E 's/^0*([^0][0-9a-z]*)$/0x\1/')
+	stop_address=$(nm $WORK_FOLDER/TMP_main_without_anti_debugging2.elf | grep "can_run_infection.end_uncipher" | cut -d ' ' -f1 | sed -E 's/^0*([^0][0-9a-z]*)$/obase=16;ibase=16;\U\1+1/' | bc | sed 's/^/0x/')
 
 	START=$(objdump -F -d --start-address=$start_address --stop-address=$stop_address $WORK_FOLDER/TMP_main_without_anti_debugging2.elf | grep -E "^[0-9a-z].*can_run_infection.*File Offset" | head -n1 | sed -E 's/.*File Offset: 0x([0-9a-z]*).*/ibase=16;\U\1+1/' | bc)
 	END=$(objdump -F -d --start-address=$start_address --stop-address=$stop_address $WORK_FOLDER/TMP_main_without_anti_debugging2.elf | grep -E "^[0-9a-z].*can_run_infection.*File Offset" | tail -n1 | sed -E 's/.*File Offset: 0x([0-9a-z]*).*/ibase=16;\U\1/' | bc)
@@ -38,26 +38,26 @@ main()
 
 same_size_between_payloads()
 {
-	perl -0777 -pe 's/\.TMP_anti_debugging:.*\.TMP_END_anti_debugging://s' main.s > $WORK_FOLDER/TMP_main_without_anti_debugging.s
-	perl -0777 -pe 's/\.TMP_uncipher:.*\.TMP_END_uncipher://s' main.s > $WORK_FOLDER/TMP_main_without_uncipher.s
+	perl -0777 -pe 's/\.begin_anti_debugging:.*\.end_anti_debugging://s' main.s > $WORK_FOLDER/TMP_main_without_anti_debugging.s
+	perl -0777 -pe 's/\.begin_uncipher.*\.end_uncipher://s' main.s > $WORK_FOLDER/TMP_main_without_uncipher.s
 
 	# TODO Change ../ with absolute path from this script or cd
 	nasm -I ../includes/ -felf64 -o $WORK_FOLDER/TMP_main_without_anti_debugging.o $WORK_FOLDER/TMP_main_without_anti_debugging.s
 	nasm -I ../includes/ -felf64 -o $WORK_FOLDER/TMP_main_without_uncipher.o $WORK_FOLDER/TMP_main_without_uncipher.s
-	start_offset=$(nm $WORK_FOLDER/TMP_main_without_uncipher.o | grep "can_run_infection.TMP_anti_debugging" | cut -d ' ' -f1 | sed -E 's/^0*([^0][0-9a-z]*)$/ibase=16;\U\1/' | bc)
-	end_offset=$(nm $WORK_FOLDER/TMP_main_without_uncipher.o | grep "can_run_infection.TMP_END_anti_debugging" | cut -d ' ' -f1 | sed -E 's/^0*([^0][0-9a-z]*)$/ibase=16;\U\1/' | bc)
+	start_offset=$(nm $WORK_FOLDER/TMP_main_without_uncipher.o | grep "can_run_infection.begin_anti_debugging" | cut -d ' ' -f1 | sed -E 's/^0*([^0][0-9a-z]*)$/ibase=16;\U\1/' | bc)
+	end_offset=$(nm $WORK_FOLDER/TMP_main_without_uncipher.o | grep "can_run_infection.end_anti_debugging" | cut -d ' ' -f1 | sed -E 's/^0*([^0][0-9a-z]*)$/ibase=16;\U\1/' | bc)
 	anti_debugging_size=$((end_offset-start_offset))
-	start_offset=$(nm $WORK_FOLDER/TMP_main_without_anti_debugging.o | grep "can_run_infection.TMP_uncipher" | cut -d ' ' -f1 | sed -E 's/^0*([^0][0-9a-z]*)$/ibase=16;\U\1/' | bc)
-	end_offset=$(nm $WORK_FOLDER/TMP_main_without_anti_debugging.o | grep "can_run_infection.TMP_END_uncipher" | cut -d ' ' -f1 | sed -E 's/^0*([^0][0-9a-z]*)$/ibase=16;\U\1/' | bc)
+	start_offset=$(nm $WORK_FOLDER/TMP_main_without_anti_debugging.o | grep "can_run_infection.begin_uncipher" | cut -d ' ' -f1 | sed -E 's/^0*([^0][0-9a-z]*)$/ibase=16;\U\1/' | bc)
+	end_offset=$(nm $WORK_FOLDER/TMP_main_without_anti_debugging.o | grep "can_run_infection.end_uncipher" | cut -d ' ' -f1 | sed -E 's/^0*([^0][0-9a-z]*)$/ibase=16;\U\1/' | bc)
 	cipher_size=$((end_offset-start_offset))
 	if [[ $cipher_size -lt $anti_debugging_size ]]; then
 		diff_size=$((anti_debugging_size-cipher_size))
-		sed -i -E "s/(\.TMP_END_uncipher:)/$(printf 'nop\\n%.0s' $(seq 1 $diff_size))\1/" "$WORK_FOLDER/TMP_main_without_anti_debugging.s"
+		sed -i -E "s/(\.end_uncipher:)/$(printf 'nop\\n%.0s' $(seq 1 $diff_size))\1/" "$WORK_FOLDER/TMP_main_without_anti_debugging.s"
 		sed -i -E -e "s/magic_key: db 0x00/magic_key: db $(printf '0x00, %.0s' $(seq 1 $anti_debugging_size))/" -e 's/, \t//' "$WORK_FOLDER/TMP_main_without_anti_debugging.s"
 		sed -i -E -e "s/magic_key: db 0x00/magic_key: db $(printf '0x00, %.0s' $(seq 1 $anti_debugging_size))/" -e 's/, \t//' "$WORK_FOLDER/TMP_main_without_uncipher.s"
 	elif [[ $cipher_size -gt $anti_debugging_size ]]; then
 		diff_size=$((cipher_size-anti_debugging_size))
-		sed -i -E "s/(\.TMP_END_anti_debugging:)/$(printf 'nop\\n%.0s' $(seq 1 $diff_size))\1/" "$WORK_FOLDER/TMP_main_without_uncipher.s"
+		sed -i -E "s/(\.end_anti_debugging:)/$(printf 'nop\\n%.0s' $(seq 1 $diff_size))\1/" "$WORK_FOLDER/TMP_main_without_uncipher.s"
 		sed -i -E -e "s/magic_key: db 0x00/magic_key: db $(printf '0x00, %.0s' $(seq 1 $cipher_size))/" -e 's/, \t//' "$WORK_FOLDER/TMP_main_without_uncipher.s"
 		sed -i -E -e "s/magic_key: db 0x00/magic_key: db $(printf '0x00, %.0s' $(seq 1 $cipher_size))/" -e 's/, \t//' "$WORK_FOLDER/TMP_main_without_anti_debugging.s"
 	else

