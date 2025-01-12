@@ -16,10 +16,10 @@ jobs:
 
     - uses: ilammy/setup-nasm@v1
 
-    - name: Build ${{ env.VIRUS_NAME }}
+    - name: Build virus
       run: make ${{ env.VIRUS_NAME }}
 
-    - name: Upload ${{ env.VIRUS_NAME }}
+    - name: Upload virus
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.VIRUS_NAME }}
@@ -36,7 +36,7 @@ jobs:
         name: ${{ env.VIRUS_NAME }}
         path: .
 
-    - name: Make ${{ env.VIRUS_NAME }} executable
+    - name: Make virus executable
       run: chmod +x ./${{ env.VIRUS_NAME }}
     
     - name: Test without test folders
@@ -53,7 +53,7 @@ jobs:
         name: ${{ env.VIRUS_NAME }}
         path: .
 
-    - name: Make ${{ env.VIRUS_NAME }} executable
+    - name: Make virus executable
       run: chmod +x ./${{ env.VIRUS_NAME }}
 
     - name: Test with empty test folders
@@ -69,7 +69,7 @@ jobs:
       with:
         name: ${{ env.VIRUS_NAME }}
 
-    - name: Make ${{ env.VIRUS_NAME }} executable
+    - name: Make virus executable
       run: chmod +x ./${{ env.VIRUS_NAME }}
 
     - name: Prepare test
@@ -88,7 +88,7 @@ jobs:
       with:
         name: ${{ env.VIRUS_NAME }}
 
-    - name: Make ${{ env.VIRUS_NAME }} executable
+    - name: Make virus executable
       run: chmod +x ./${{ env.VIRUS_NAME }}
 
     - name: Prepare test
@@ -116,13 +116,13 @@ jobs:
       with:
         name: ${{ env.VIRUS_NAME }}
 
-    - name: Make ${{ env.VIRUS_NAME }} executable
+    - name: Make virus executable
       run: chmod +x ./${{ env.VIRUS_NAME }}
 
     - name: Prepare test
       run: mkdir -p /tmp/test && cp ./${{ env.VIRUS_NAME }} /tmp/test/${{ env.VIRUS_NAME }}
 
-    - name: Infect ${{ env.VIRUS_NAME }}
+    - name: Infect virus
       run: ./${{ env.VIRUS_NAME }}
 
   basic_echo_test:
@@ -135,7 +135,7 @@ jobs:
       with:
         name: ${{ env.VIRUS_NAME }}
 
-    - name: Make ${{ env.VIRUS_NAME }} executable
+    - name: Make virus executable
       run: chmod +x ./${{ env.VIRUS_NAME }}
 
     - name: Prepare test
@@ -178,7 +178,7 @@ jobs:
       with:
         name: ${{ env.VIRUS_NAME }}
 
-    - name: Make ${{ env.VIRUS_NAME }} executable
+    - name: Make virus executable
       run: chmod +x ./${{ env.VIRUS_NAME }}
 
     - name: Prepare test
@@ -221,7 +221,7 @@ jobs:
       with:
         name: ${{ env.VIRUS_NAME }}
 
-    - name: Make ${{ env.VIRUS_NAME }} executable
+    - name: Make virus executable
       run: chmod +x ./${{ env.VIRUS_NAME }}
 
     - name: Prepare test
@@ -271,7 +271,7 @@ jobs:
         name: ${{ env.VIRUS_NAME }}
         path: .
 
-    - name: Make ${{ env.VIRUS_NAME }} executable
+    - name: Make virus executable
       run: chmod +x ./${{ env.VIRUS_NAME }}
 
     - name: Prepare test
@@ -305,7 +305,7 @@ jobs:
       with:
         name: ${{ env.VIRUS_NAME }}
     
-    - name: Make ${{ env.VIRUS_NAME }} executable
+    - name: Make virus executable
       run: chmod +x ./${{ env.VIRUS_NAME }}
 
     - name: Prepare test
@@ -339,7 +339,7 @@ jobs:
   #     with:
   #       name: ${{ env.VIRUS_NAME }}
 
-  #   - name: Make ${{ env.VIRUS_NAME }} executable
+  #   - name: Make virus executable
   #     run: chmod +x ./${{ env.VIRUS_NAME }}
 
   #   - name: Prepare test
