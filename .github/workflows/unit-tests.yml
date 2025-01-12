@@ -1,7 +1,7 @@
 name: Unit Tests
 
 env:
-  VIRUS_NAME: ${{ env.VIRUS_NAME }}
+  VIRUS_NAME: Pestilence
 
 on:
   push:
