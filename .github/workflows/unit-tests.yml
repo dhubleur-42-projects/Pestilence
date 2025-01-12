@@ -98,16 +98,16 @@ jobs:
       run: chmod +x ./Pestilence
 
     - name: Prepare test
-      run: mkdir -p /tmp/test && cp /bin/echo /tmp/test/echo
+      run: mkdir -p /tmp/test && cp /bin/ls /tmp/test/ls
 
-    - name: Infect echo
+    - name: Infect ls
       run: ./Pestilence
 
-    - name: Test echo has signature
-      run: strings /tmp/test/echo | grep "Pestilence"
+    - name: Test ls has signature
+      run: strings /tmp/test/ls | grep "Pestilence"
 
-    - name: Run infected echo
-      run: /tmp/test/echo "Hello, world!" > echo_output 
+    - name: Run infected ls
+      run: /tmp/test/ls -al > ls_output 
 
-    - name: Check infected echo output
-      run: echo "Hello, world!" > echo_expected && diff echo_output echo_expected
+    - name: Check infected ls output
+      run: ls -al > lso_expected && diff ls_output ls_expected
