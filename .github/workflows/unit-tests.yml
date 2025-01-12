@@ -22,7 +22,7 @@ jobs:
         name: Pestilence
         path: ./Pestilence
 
-  no_folder_testempty_test:
+  no_folder_test:
     name: Test without test folders
     runs-on: ubuntu-latest
     needs: build
@@ -39,7 +39,7 @@ jobs:
     - name: Test without test folders
       run: ./Pestilence
 
-  empty_folder_testempty_test:
+  empty_folder_test:
     name: Test with empty test folders
     runs-on: ubuntu-latest
     needs: build
@@ -55,3 +55,25 @@ jobs:
 
     - name: Test with empty test folders
       run: mkdir -p /tmp/test && mkdir -p /tmp/test2 && ./Pestilence
+
+  basic_echo_test:
+    name: Basic infection of echo
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: Pestilence
+
+    - name: Make pestilence executable
+      run: chmod +x ./Pestilence
+
+    - name: Prepare test
+      run: mkdir -p /tmp/test && cp /bin/echo /tmp/test/echo
+
+    - name: Infect echo
+      run: ./Pestilence
+
+    - name: Test echo has signature:
+      run: strings /tmp/test/echo | grep "Pestience"
