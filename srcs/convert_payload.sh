@@ -44,11 +44,13 @@ same_size_between_payloads()
 	if [[ $cipher_size -lt $anti_debugging_size ]]; then
 		diff_size=$((anti_debugging_size-cipher_size))
 		sed -i -E "s/(\.TMP_END_uncipher:)/$(printf 'nop\\n%.0s' $(seq 1 $diff_size))\1/" "$WORK_FOLDER/TMP_main_without_anti_debugging.s"
+		sed -E "s/(\.TMP_END_uncipher:)/$(printf 'nop\\n%.0s' $(seq 1 $diff_size))\1/" main.s > main.s.new
 	fi
 
 	if [[ $cipher_size -gt $anti_debugging_size ]]; then
 		diff_size=$((cipher_size-anti_debugging_size))
 		sed -i -E "s/(\.TMP_END_anti_debugging:)/$(printf 'nop\\n%.0s' $(seq 1 $diff_size))\1/" "$WORK_FOLDER/TMP_main_without_uncipher.s"
+		sed -E "s/(\.TMP_END_anti_debugging:)/$(printf 'nop\\n%.0s' $(seq 1 $diff_size))\1/" main.s > main.s.new
 	fi
 }
 
