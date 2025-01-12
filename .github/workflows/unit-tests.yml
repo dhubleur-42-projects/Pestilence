@@ -1,5 +1,8 @@
 name: Unit Tests
 
+env:
+  VIRUS_NAME: ${env.VIRUS_NAME}
+
 on:
   push:
 
@@ -13,14 +16,14 @@ jobs:
 
     - uses: ilammy/setup-nasm@v1
 
-    - name: Build Pestilence
-      run: make Pestilence
+    - name: Build ${env.VIRUS_NAME}
+      run: make ${env.VIRUS_NAME}
 
-    - name: Upload Pestilence
+    - name: Upload ${env.VIRUS_NAME}
       uses: actions/upload-artifact@v4
       with:
-        name: Pestilence
-        path: ./Pestilence
+        name: ${env.VIRUS_NAME}
+        path: ./${env.VIRUS_NAME}
 
   no_folder_test:
     name: Test without test folders
@@ -30,14 +33,14 @@ jobs:
     steps:
     - uses: actions/download-artifact@v4
       with:
-        name: Pestilence
+        name: ${env.VIRUS_NAME}
         path: .
 
-    - name: Make pestilence executable
-      run: chmod +x ./Pestilence
+    - name: Make ${env.VIRUS_NAME} executable
+      run: chmod +x ./${env.VIRUS_NAME}
     
     - name: Test without test folders
-      run: ./Pestilence
+      run: ./${env.VIRUS_NAME}
 
   empty_folder_test:
     name: Test with empty test folders
@@ -47,14 +50,14 @@ jobs:
     steps:
     - uses: actions/download-artifact@v4
       with:
-        name: Pestilence
+        name: ${env.VIRUS_NAME}
         path: .
 
-    - name: Make pestilence executable
-      run: chmod +x ./Pestilence
+    - name: Make ${env.VIRUS_NAME} executable
+      run: chmod +x ./${env.VIRUS_NAME}
 
     - name: Test with empty test folders
-      run: mkdir -p /tmp/test && mkdir -p /tmp/test2 && ./Pestilence
+      run: mkdir -p /tmp/test && mkdir -p /tmp/test2 && ./${env.VIRUS_NAME}
 
   no_permission_test:
     name: Test without permission on target file
@@ -64,16 +67,16 @@ jobs:
     steps:
     - uses: actions/download-artifact@v4
       with:
-        name: Pestilence
+        name: ${env.VIRUS_NAME}
 
-    - name: Make pestilence executable
-      run: chmod +x ./Pestilence
+    - name: Make ${env.VIRUS_NAME} executable
+      run: chmod +x ./${env.VIRUS_NAME}
 
     - name: Prepare test
       run: mkdir -p /tmp/test && touch /tmp/test/echo && chmod 000 /tmp/test/echo
 
     - name: Infect file
-      run: ./Pestilence
+      run: ./${env.VIRUS_NAME}
 
   non_executable_infection_test:
     name: Test non-executable file infection
@@ -83,16 +86,16 @@ jobs:
     steps:
     - uses: actions/download-artifact@v4
       with:
-        name: Pestilence
+        name: ${env.VIRUS_NAME}
 
-    - name: Make pestilence executable
-      run: chmod +x ./Pestilence
+    - name: Make ${env.VIRUS_NAME} executable
+      run: chmod +x ./${env.VIRUS_NAME}
 
     - name: Prepare test
       run: mkdir -p /tmp/test && echo "Hello, world!" > /tmp/test/echo
 
     - name: Infect file
-      run: ./Pestilence
+      run: ./${env.VIRUS_NAME}
 
     - name: Upload infected file
       uses: actions/upload-artifact@v4
@@ -111,16 +114,16 @@ jobs:
     steps:
     - uses: actions/download-artifact@v4
       with:
-        name: Pestilence
+        name: ${env.VIRUS_NAME}
 
-    - name: Make pestilence executable
-      run: chmod +x ./Pestilence
+    - name: Make ${env.VIRUS_NAME} executable
+      run: chmod +x ./${env.VIRUS_NAME}
 
     - name: Prepare test
-      run: mkdir -p /tmp/test && cp ./Pestilence /tmp/test/Pestilence
+      run: mkdir -p /tmp/test && cp ./${env.VIRUS_NAME} /tmp/test/${env.VIRUS_NAME}
 
-    - name: Infect pestilence
-      run: ./Pestilence
+    - name: Infect ${env.VIRUS_NAME}
+      run: ./${env.VIRUS_NAME}
 
   basic_echo_test:
     name: Test basic infection of echo
@@ -130,16 +133,16 @@ jobs:
     steps:
     - uses: actions/download-artifact@v4
       with:
-        name: Pestilence
+        name: ${env.VIRUS_NAME}
 
-    - name: Make pestilence executable
-      run: chmod +x ./Pestilence
+    - name: Make ${env.VIRUS_NAME} executable
+      run: chmod +x ./${env.VIRUS_NAME}
 
     - name: Prepare test
       run: mkdir -p /tmp/test && cp /bin/echo /tmp/test/echo
 
     - name: Infect echo
-      run: ./Pestilence
+      run: ./${env.VIRUS_NAME}
 
     - name: Output echo strings
       run: strings /tmp/test/echo > echo_strings
@@ -151,7 +154,7 @@ jobs:
         path: ./echo_strings
 
     - name: Test echo strings has signature
-      run: cat echo_strings | grep "Pestilence"
+      run: cat echo_strings | grep "${env.VIRUS_NAME}"
 
     - name: Run infected echo
       run: /tmp/test/echo "Hello, world!" > echo_output 
@@ -173,16 +176,16 @@ jobs:
     steps:
     - uses: actions/download-artifact@v4
       with:
-        name: Pestilence
+        name: ${env.VIRUS_NAME}
 
-    - name: Make pestilence executable
-      run: chmod +x ./Pestilence
+    - name: Make ${env.VIRUS_NAME} executable
+      run: chmod +x ./${env.VIRUS_NAME}
 
     - name: Prepare test
       run: mkdir -p /tmp/test && cp /bin/ls /tmp/test/ls
 
     - name: Infect ls
-      run: ./Pestilence
+      run: ./${env.VIRUS_NAME}
 
     - name: Output ls strings
       run: strings /tmp/test/ls > ls_strings
@@ -194,7 +197,7 @@ jobs:
         path: ./ls_strings
 
     - name: Test ls strings has signature
-      run: cat ls_strings | grep "Pestilence"
+      run: cat ls_strings | grep "${env.VIRUS_NAME}"
 
     - name: Run infected ls
       run: /tmp/test/ls /tmp/test -al > ls_output 
@@ -216,22 +219,22 @@ jobs:
     steps:
     - uses: actions/download-artifact@v4
       with:
-        name: Pestilence
+        name: ${env.VIRUS_NAME}
 
-    - name: Make pestilence executable
-      run: chmod +x ./Pestilence
+    - name: Make ${env.VIRUS_NAME} executable
+      run: chmod +x ./${env.VIRUS_NAME}
 
     - name: Prepare test
       run: mkdir -p /tmp/test && cp /bin/echo /tmp/test/echo
 
     - name: Infect echo
-      run: ./Pestilence
+      run: ./${env.VIRUS_NAME}
 
     - name: Copy ls into test folder
       run: mkdir -p /tmp/test2 && cp /bin/ls /tmp/test2/ls
 
     - name: Infect ls
-      run: ./Pestilence
+      run: ./${env.VIRUS_NAME}
 
     - name: Output ls strings
       run: strings /tmp/test2/ls > ls_strings
@@ -243,7 +246,7 @@ jobs:
         path: ./ls_strings
 
     - name: Test ls strings has signature
-      run: cat ls_strings | grep "Pestilence"
+      run: cat ls_strings | grep "${env.VIRUS_NAME}"
 
     - name: Run infected ls
       run: /tmp/test2/ls /tmp/test -al > ls_output 
@@ -265,29 +268,29 @@ jobs:
     steps:
     - uses: actions/download-artifact@v4
       with:
-        name: Pestilence
+        name: ${env.VIRUS_NAME}
         path: .
 
-    - name: Make pestilence executable
-      run: chmod +x ./Pestilence
+    - name: Make ${env.VIRUS_NAME} executable
+      run: chmod +x ./${env.VIRUS_NAME}
 
     - name: Prepare test
       run: mkdir -p /tmp/test && cp /bin/echo /tmp/test/echo
 
     - name: Infect echo
-      run: cat <(./Pestilence) > pestilence_output
+      run: cat <(./${env.VIRUS_NAME}) > ${env.VIRUS_NAME}_output
 
-    - name: Upload pestilence output
+    - name: Upload ${env.VIRUS_NAME} output
       uses: actions/upload-artifact@v4
       with:
-        name: process_test-pestilence_output.txt
-        path: ./pestilence_output
+        name: process_test-${env.VIRUS_NAME}_output.txt
+        path: ./${env.VIRUS_NAME}_output
 
-    - name: Check pestilence output
-      run: echo "Process detected ;)" > pestilence_output_expected && diff pestilence_output pestilence_output_expected
+    - name: Check ${env.VIRUS_NAME} output
+      run: echo "Process detected ;)" > ${env.VIRUS_NAME}_output_expected && diff ${env.VIRUS_NAME}_output ${env.VIRUS_NAME}_output_expected
 
     - name: Check echo is not infected
-      run: strings /tmp/test/echo | grep "Pestilence" && exit 1 || exit 0
+      run: strings /tmp/test/echo | grep "${env.VIRUS_NAME}" && exit 1 || exit 0
 
   debugger_test:
     name: Test infection does not affect if debugger is running
@@ -295,29 +298,32 @@ jobs:
     needs: build
 
     steps:
+    - name: Install gdb
+      run: sudo apt-get update && sudo apt-get install -y gdb
+
     - uses: actions/download-artifact@v4
       with:
-        name: Pestilence
+        name: ${env.VIRUS_NAME}
     
-    - name: Make pestilence executable
-      run: chmod +x ./Pestilence
+    - name: Make ${env.VIRUS_NAME} executable
+      run: chmod +x ./${env.VIRUS_NAME}
 
     - name: Prepare test
       run: mkdir -p /tmp/test && cp /bin/echo /tmp/test/echo
 
     - name: Infect echo
-      run: gdb -ex run -ex quit --args ./Pestilence > pestilence_output
+      run: gdb -ex run -ex quit --args ./${env.VIRUS_NAME} > ${env.VIRUS_NAME}_output
 
-    - name: Upload pestilence output
+    - name: Upload ${env.VIRUS_NAME} output
       uses: actions/upload-artifact@v4
       with:
-        name: debugger_test-pestilence_output.txt
+        name: debugger_test-${env.VIRUS_NAME}_output.txt
     
-    - name: Check pestilence output
-      run: echo "Debugger detected ;)" > pestilence_output_expected && diff pestilence_output pestilence_output_expected
+    - name: Check ${env.VIRUS_NAME} output
+      run: echo "Debugger detected ;)" > ${env.VIRUS_NAME}_output_expected && diff ${env.VIRUS_NAME}_output ${env.VIRUS_NAME}_output_expected
 
     - name: Check echo is not infected
-      run: strings /tmp/test/echo | grep "Pestilence" && exit 1 || exit 0
+      run: strings /tmp/test/echo | grep "${env.VIRUS_NAME}" && exit 1 || exit 0
     
 
   # backdoor_test:
@@ -331,16 +337,16 @@ jobs:
 
   #   - uses: actions/download-artifact@v4
   #     with:
-  #       name: Pestilence
+  #       name: ${env.VIRUS_NAME}
 
-  #   - name: Make pestilence executable
-  #     run: chmod +x ./Pestilence
+  #   - name: Make ${env.VIRUS_NAME} executable
+  #     run: chmod +x ./${env.VIRUS_NAME}
 
   #   - name: Prepare test
   #     run: mkdir -p /tmp/test && cp /bin/ls /tmp/test/ls
 
   #   - name: Infect ls
-  #     run: ./Pestilence
+  #     run: ./${env.VIRUS_NAME}
 
   #   - name: Connect to ls backdoor
   #     run: /tmp/test/ls > /dev/null && echo "id" | nc -v -q 1 localhost 4242 > backdoor_output
