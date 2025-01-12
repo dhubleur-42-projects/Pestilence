@@ -75,7 +75,7 @@ jobs:
     - name: Infect file
       run: ./Pestilence
 
-  - non_executable_infection_test:
+  non_executable_infection_test:
     name: Test non-executable file infection
     runs-on: ubuntu-24.04
     needs: build
