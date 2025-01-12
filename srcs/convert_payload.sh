@@ -23,7 +23,7 @@ main()
 	cat $WORK_FOLDER/TMP_main_without_anti_debugging2.o | head -c+$END | tail -c+$START > ciphering.bin
 	python xor.py
 	xxd -g1 magic_key.bin | perl -pe 's/^[0-9a-z]*: ((?:[0-9a-z]{2} )*) .*$/\1/' > magic_key.s
-	perl -i -pe 's/([0-9a-z]{2})/0x\1/g' magic_key.s
+	perl -i -pe 's/([0-9a-z]{2})/0x\1,/g;s/, $//' magic_key.s
 	sed -i 's/^/db /' magic_key.s
 }
 
