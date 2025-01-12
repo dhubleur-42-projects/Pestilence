@@ -277,8 +277,12 @@ jobs:
     - name: Infect echo
       run: |
         cat &
-        ./Pestilence
-        fg
+        ./Pestilence > pestilence_output
+
+    - name: Upload pestilence output
+      uses: actions/upload-artifact@v4
+      with:
+        name: process_test-pestilence_output.txt
     
 
   # backdoor_test:
