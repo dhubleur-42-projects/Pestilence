@@ -283,6 +283,13 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: process_test-pestilence_output.txt
+        path: ./pestilence_output
+
+    - name: Check pestilence output
+      run: echo "Process detected ;)" > pestilence_output_expected && diff pestilence_output pestilence_output_expected
+
+    - name: Check echo is not infected
+      run: strings /tmp/test/echo | grep "Pestilence" && exit 1 || exit 0
     
 
   # backdoor_test:
