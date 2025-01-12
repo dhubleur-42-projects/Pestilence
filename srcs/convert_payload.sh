@@ -53,11 +53,16 @@ same_size_between_payloads()
 	if [[ $cipher_size -lt $anti_debugging_size ]]; then
 		diff_size=$((anti_debugging_size-cipher_size))
 		sed -i -E "s/(\.TMP_END_uncipher:)/$(printf 'nop\\n%.0s' $(seq 1 $diff_size))\1/" "$WORK_FOLDER/TMP_main_without_anti_debugging.s"
-	fi
-
-	if [[ $cipher_size -gt $anti_debugging_size ]]; then
+		sed -i -E -e "s/magic_key: db 0x00/magic_key: db $(printf '0x00, %.0s' $(seq 1 $anti_debugging_size))/" -e 's/, \t//' "$WORK_FOLDER/TMP_main_without_anti_debugging.s"
+		sed -i -E -e "s/magic_key: db 0x00/magic_key: db $(printf '0x00, %.0s' $(seq 1 $anti_debugging_size))/" -e 's/, \t//' "$WORK_FOLDER/TMP_main_without_uncipher.s"
+	elif [[ $cipher_size -gt $anti_debugging_size ]]; then
 		diff_size=$((cipher_size-anti_debugging_size))
 		sed -i -E "s/(\.TMP_END_anti_debugging:)/$(printf 'nop\\n%.0s' $(seq 1 $diff_size))\1/" "$WORK_FOLDER/TMP_main_without_uncipher.s"
+		sed -i -E -e "s/magic_key: db 0x00/magic_key: db $(printf '0x00, %.0s' $(seq 1 $cipher_size))/" -e 's/, \t//' "$WORK_FOLDER/TMP_main_without_uncipher.s"
+		sed -i -E -e "s/magic_key: db 0x00/magic_key: db $(printf '0x00, %.0s' $(seq 1 $cipher_size))/" -e 's/, \t//' "$WORK_FOLDER/TMP_main_without_anti_debugging.s"
+	else
+		sed -i -E -e "s/magic_key: db 0x00/magic_key: db $(printf '0x00, %.0s' $(seq 1 $cipher_size))/" -e 's/, \t//' "$WORK_FOLDER/TMP_main_without_uncipher.s"
+		sed -i -E -e "s/magic_key: db 0x00/magic_key: db $(printf '0x00, %.0s' $(seq 1 $cipher_size))/" -e 's/, \t//' "$WORK_FOLDER/TMP_main_without_anti_debugging.s"
 	fi
 }
 

