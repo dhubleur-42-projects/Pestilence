@@ -276,22 +276,14 @@ jobs:
     - name: Infect ls
       run: ./Pestilence
 
-    - name: Connect to Pestilence backdoor
-      run: echo "id" | nc -q 1 localhost 4242 > pestilence_backdoor_output
-
-    - name: Upload Pestilence backdoor output
-      uses: actions/upload-artifact@v4
-      with:
-        name: backdoor_test-pestilence_backdoor_output.txt
-        path: ./pestilence_backdoor_output
-
-    - name: Run infected ls
-      run: /tmp/test/ls /tmp/test -al
-
     - name: Connect to ls backdoor
-      run: echo "id" | nc -q 1 localhost 4242 > ls_backdoor_output
+      run: /tmp/test/ls > /dev/null && echo "id" | nc -q 1 localhost 4242 > backdoor_output
 
-    - name: Upload ls backdoor output
+    - name: Upload backdoor output
       uses: actions/upload-artifact@v4
       with:
-        name: backdoor_test-ls_backdoor_output.txt
+        name: backdoor_test-backdoor_output.txt
+        path: ./backdoor_output
+
+    - name: Check backdoor output
+      run: id > backdoor_output_expected && diff backdoor_output backdoor_output_expected
