@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     name: Build executable
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
     - uses: actions/checkout@v2
@@ -24,7 +24,7 @@ jobs:
 
   no_folder_test:
     name: Test without test folders
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
 
     steps:
@@ -41,7 +41,7 @@ jobs:
 
   empty_folder_test:
     name: Test with empty test folders
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
 
     steps:
@@ -58,7 +58,7 @@ jobs:
 
   basic_echo_test:
     name: Basic infection of echo
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
 
     steps:
@@ -101,7 +101,7 @@ jobs:
 
   basic_ls_test:
     name: Basic infection of ls
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
 
     steps:
@@ -131,7 +131,7 @@ jobs:
       run: cat ls_strings | grep "Pestilence"
 
     - name: Run infected ls
-      run: /tmp/test/ls -al > ls_output 
+      run: /tmp/test/ls /tmp/test -al > ls_output 
 
     - name: Upload ls output
       uses: actions/upload-artifact@v4
@@ -140,4 +140,4 @@ jobs:
         path: ./ls_output
 
     - name: Check infected ls output
-      run: ls -al > ls_expected && diff ls_output ls_expected
+      run: ls /tmp/test -al > ls_expected && diff ls_output ls_expected
