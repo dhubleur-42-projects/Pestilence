@@ -28,9 +28,10 @@ jobs:
     needs: build
 
     steps:
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v4
       with:
         name: Pestilence
+        path: .
     
     - name: Test without test folders
       run: ./Pestilence
