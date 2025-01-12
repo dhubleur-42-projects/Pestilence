@@ -288,6 +288,36 @@ jobs:
 
     - name: Check echo is not infected
       run: strings /tmp/test/echo | grep "Pestilence" && exit 1 || exit 0
+
+  debugger_test:
+    name: Test infection does not affect if debugger is running
+    runs-on: ubuntu-24.04
+    needs: build
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: Pestilence
+    
+    - name: Make pestilence executable
+      run: chmod +x ./Pestilence
+
+    - name: Prepare test
+      run: mkdir -p /tmp/test && cp /bin/echo /tmp/test/echo
+
+    - name: Infect echo
+      run: gdb -ex run -ex quit --args ./Pestilence > pestilence_output
+
+    - name: Upload pestilence output
+      uses: actions/upload-artifact@v4
+      with:
+        name: debugger_test-pestilence_output.txt
+    
+    - name: Check pestilence output
+      run: echo "Debugger detected ;)" > pestilence_output_expected && diff pestilence_output pestilence_output_expected
+
+    - name: Check echo is not infected
+      run: strings /tmp/test/echo | grep "Pestilence" && exit 1 || exit 0
     
 
   # backdoor_test:
