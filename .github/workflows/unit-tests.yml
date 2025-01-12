@@ -72,8 +72,36 @@ jobs:
     - name: Prepare test
       run: mkdir -p /tmp/test && touch /tmp/test/echo && chmod 000 /tmp/test/echo
 
-    - name: Infect echo
+    - name: Infect file
       run: ./Pestilence
+
+  - non_executable_infection_test:
+    name: Test non-executable file infection
+    runs-on: ubuntu-24.04
+    needs: build
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: Pestilence
+
+    - name: Make pestilence executable
+      run: chmod +x ./Pestilence
+
+    - name: Prepare test
+      run: mkdir -p /tmp/test && echo "Hello, world!" > /tmp/test/echo
+
+    - name: Infect file
+      run: ./Pestilence
+
+    - name: Upload infected file
+      uses: actions/upload-artifact@v4
+      with:
+        name: non_executable_infection_test-echo.txt
+        path: /tmp/test/echo
+
+    - name: Test infected file did not change
+      run: echo "Hello, world!" > /tmp/test/echo_expected && diff /tmp/test/echo /tmp/test/echo_expected
 
   self_infection_test:
     name: Test self-infection
