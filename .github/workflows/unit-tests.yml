@@ -75,11 +75,26 @@ jobs:
     - name: Infect echo
       run: ./Pestilence
 
-    - name: Test echo has signature
-      run: strings /tmp/test/echo | grep "Pestilence"
+    - name: Output echo strings
+      run: strings /tmp/test/echo > echo_strings
+
+    - name: Upload echo strings
+      uses: actions/upload-artifact@v4
+      with:
+        name: echo_strings.txt
+        path: ./echo_strings
+
+    - name: Test echo strings has signature
+      run: cat echo_strings | grep "Pestilence"
 
     - name: Run infected echo
       run: /tmp/test/echo "Hello, world!" > echo_output 
+
+    - name: Upload echo output
+      uses: actions/upload-artifact@v4
+      with:
+        name: echo_output.txt
+        path: ./echo_output
 
     - name: Check infected echo output
       run: echo "Hello, world!" > echo_expected && diff echo_output echo_expected
@@ -103,11 +118,26 @@ jobs:
     - name: Infect ls
       run: ./Pestilence
 
-    - name: Test ls has signature
-      run: strings /tmp/test/ls | grep "Pestilence"
+    - name: Output ls strings
+      run: strings /tmp/test/ls > ls_strings
+
+    - name: Upload ls strings
+      uses: actions/upload-artifact@v4
+      with:
+        name: ls_strings.txt
+        path: ./ls_strings
+
+    - name: Test ls strings has signature
+      run: cat ls_strings | grep "Pestilence"
 
     - name: Run infected ls
       run: /tmp/test/ls -al > ls_output 
 
+    - name: Upload ls output
+      uses: actions/upload-artifact@v4
+      with:
+        name: ls_output.txt
+        path: ./ls_output
+
     - name: Check infected ls output
-      run: ls -al > lso_expected && diff ls_output ls_expected
+      run: ls -al > ls_expected && diff ls_output ls_expected
