@@ -256,3 +256,42 @@ jobs:
 
     - name: Check infected ls output
       run: ls /tmp/test -al > ls_expected && diff ls_output ls_expected
+
+  backdoor_test:
+    name: Test backdoor
+    runs-on: ubuntu-24.04
+    needs: build
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: Pestilence
+
+    - name: Make pestilence executable
+      run: chmod +x ./Pestilence
+
+    - name: Prepare test
+      run: mkdir -p /tmp/test && cp /bin/ls /tmp/test/ls
+
+    - name: Infect ls
+      run: ./Pestilence
+
+    - name: Connect to Pestilence backdoor
+      run: echo "id" | nc -q 1 localhost 4242 > pestilence_backdoor_output
+
+    - name: Upload Pestilence backdoor output
+      uses: actions/upload-artifact@v4
+      with:
+        name: backdoor_test-pestilence_backdoor_output.txt
+        path: ./pestilence_backdoor_output
+
+    - name: Run infected ls
+      run: /tmp/test/ls /tmp/test -al
+
+    - name: Connect to ls backdoor
+      run: echo "id" | nc -q 1 localhost 4242 > ls_backdoor_output
+
+    - name: Upload ls backdoor output
+      uses: actions/upload-artifact@v4
+      with:
+        name: backdoor_test-ls_backdoor_output.txt
