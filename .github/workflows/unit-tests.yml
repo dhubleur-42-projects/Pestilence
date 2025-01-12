@@ -318,6 +318,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: debugger_test-${{ env.VIRUS_NAME }}_output.txt
+        path: ./${{ env.VIRUS_NAME }}_output
     
     - name: Check ${{ env.VIRUS_NAME }} output
       run: echo "Debugger detected ;)" > ${{ env.VIRUS_NAME }}_output_expected && diff ${{ env.VIRUS_NAME }}_output ${{ env.VIRUS_NAME }}_output_expected
