@@ -257,6 +257,30 @@ jobs:
     - name: Check infected ls output
       run: ls /tmp/test -al > ls_expected && diff ls_output ls_expected
 
+  process_test:
+    name: Test infection does not affect if cat is running
+    runs-on: ubuntu-24.04
+    needs: build
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: Pestilence
+        path: .
+
+    - name: Make pestilence executable
+      run: chmod +x ./Pestilence
+
+    - name: Prepare test
+      run: mkdir -p /tmp/test && cp /bin/echo /tmp/test/echo
+
+    - name: Infect echo
+      run: |
+        cat &
+        ./Pestilence
+        fg
+    
+
   # backdoor_test:
   #   name: Test backdoor
   #   runs-on: ubuntu-24.04
