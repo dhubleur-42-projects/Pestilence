@@ -25,7 +25,7 @@ jobs:
   empty_test:
     name: Test without test folders or with empty test folders
     runs-on: ubuntu-latest
-    depends-on: build
+    needs: build
 
     steps:
     - uses: actions/download-artifact@v2
