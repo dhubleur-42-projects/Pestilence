@@ -56,6 +56,44 @@ jobs:
     - name: Test with empty test folders
       run: mkdir -p /tmp/test && mkdir -p /tmp/test2 && ./Pestilence
 
+  no_permission_test:
+    name: Test without permission on target file
+    runs-on: ubuntu-24.04
+    needs: build
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: Pestilence
+
+    - name: Make pestilence executable
+      run: chmod +x ./Pestilence
+
+    - name: Prepare test
+      run: mkdir -p /tmp/test && touch /tmp/test/echo && chmod 000 /tmp/test/echo
+
+    - name: Infect echo
+      run: ./Pestilence
+
+  self_infection_test:
+    name: Test self-infection
+    runs-on: ubuntu-24.04
+    needs: build
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: Pestilence
+
+    - name: Make pestilence executable
+      run: chmod +x ./Pestilence
+
+    - name: Prepare test
+      run: mkdir -p /tmp/test && cp ./Pestilence /tmp/test/Pestilence
+
+    - name: Infect pestilence
+      run: ./Pestilence
+
   basic_echo_test:
     name: Test basic infection of echo
     runs-on: ubuntu-24.04
