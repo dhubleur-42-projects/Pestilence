@@ -275,9 +275,7 @@ jobs:
       run: mkdir -p /tmp/test && cp /bin/echo /tmp/test/echo
 
     - name: Infect echo
-      run: |
-        cat &
-        ./Pestilence > pestilence_output
+      run: cat <(./Pestilence) > pestilence_output
 
     - name: Upload pestilence output
       uses: actions/upload-artifact@v4
