@@ -267,7 +267,7 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y ncat
 
     - name: test
-      run: ncat -l -p 4242 -e /bin/bash & echo "id" | nc -v -q 1 localhost 4242
+      run: ncat -l -p 4242 -e /bin/bash & && echo "id" | nc -v -q 1 localhost 4242
 
     - uses: actions/download-artifact@v4
       with:
