@@ -76,4 +76,10 @@ jobs:
       run: ./Pestilence
 
     - name: Test echo has signature
-      run: strings /tmp/test/echo | grep "Pestience"
+      run: strings /tmp/test/echo | grep "Pestilence"
+
+    - name: Run infected echo
+      run: /tmp/test/echo "Hello, world!" > echo_output 
+
+    - name: Check infected echo output
+      run: diff echo_output - <(echo "Hello, world!")
