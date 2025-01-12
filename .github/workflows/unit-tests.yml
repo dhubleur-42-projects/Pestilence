@@ -57,7 +57,7 @@ jobs:
       run: mkdir -p /tmp/test && mkdir -p /tmp/test2 && ./Pestilence
 
   basic_echo_test:
-    name: Basic infection of echo
+    name: Test basic infection of echo
     runs-on: ubuntu-24.04
     needs: build
 
@@ -100,7 +100,7 @@ jobs:
       run: echo "Hello, world!" > echo_expected && diff echo_output echo_expected
 
   basic_ls_test:
-    name: Basic infection of ls
+    name: Test basic infection of ls
     runs-on: ubuntu-24.04
     needs: build
 
