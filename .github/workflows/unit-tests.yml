@@ -36,5 +36,4 @@ jobs:
       run: ./Pestilence
 
     - name: Test with empty test folders
-      run: mkdir -p /tmp/test && mkdir -p /tmp/test2
-      run: ./Pestilence
+      run: mkdir -p /tmp/test && mkdir -p /tmp/test2 && ./Pestilence
