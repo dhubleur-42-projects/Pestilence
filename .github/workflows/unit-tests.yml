@@ -75,5 +75,5 @@ jobs:
     - name: Infect echo
       run: ./Pestilence
 
-    - name: Test echo has signature:
+    - name: Test echo has signature
       run: strings /tmp/test/echo | grep "Pestience"
