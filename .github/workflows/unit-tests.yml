@@ -22,8 +22,8 @@ jobs:
         name: Pestilence
         path: ./Pestilence
 
-  empty_test:
-    name: Test without test folders or with empty test folders
+  no_folder_testempty_test:
+    name: Test without test folders
     runs-on: ubuntu-latest
     needs: build
 
@@ -32,9 +32,26 @@ jobs:
       with:
         name: Pestilence
         path: .
+
+    - name: Make pestilence executable
+      run: chmod +x ./Pestilence
     
     - name: Test without test folders
       run: ./Pestilence
+
+  empty_folder_testempty_test:
+    name: Test with empty test folders
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: Pestilence
+        path: .
+
+    - name: Make pestilence executable
+      run: chmod +x ./Pestilence
 
     - name: Test with empty test folders
       run: mkdir -p /tmp/test && mkdir -p /tmp/test2 && ./Pestilence
