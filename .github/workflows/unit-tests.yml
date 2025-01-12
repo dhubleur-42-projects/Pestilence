@@ -20,3 +20,21 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Pestilence
+        path: ./Pestilence
+
+  empty_test:
+    name: Test without test folders or with empty test folders
+    runs-on: ubuntu-latest
+    depends-on: build
+
+    steps:
+    - uses: actions/download-artifact@v2
+      with:
+        name: Pestilence
+    
+    - name: Test without test folders
+      run: ./Pestilence
+
+    - name: Test with empty test folders
+      run: mkdir -p /tmp/test && mkdir -p /tmp/test2
+      run: ./Pestilence
