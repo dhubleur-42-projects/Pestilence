@@ -82,4 +82,4 @@ jobs:
       run: /tmp/test/echo "Hello, world!" > echo_output 
 
     - name: Check infected echo output
-      run: diff echo_output - <(echo "Hello, world!")
+      run: echo "Hello, world!" > echo_expected && diff echo_output echo_expected
