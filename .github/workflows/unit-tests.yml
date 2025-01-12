@@ -81,7 +81,7 @@ jobs:
     - name: Upload echo strings
       uses: actions/upload-artifact@v4
       with:
-        name: echo_strings.txt
+        name: basic_echo_test-echo_strings.txt
         path: ./echo_strings
 
     - name: Test echo strings has signature
@@ -93,7 +93,7 @@ jobs:
     - name: Upload echo output
       uses: actions/upload-artifact@v4
       with:
-        name: echo_output.txt
+        name: basic_echo_test-echo_output.txt
         path: ./echo_output
 
     - name: Check infected echo output
@@ -124,7 +124,7 @@ jobs:
     - name: Upload ls strings
       uses: actions/upload-artifact@v4
       with:
-        name: ls_strings.txt
+        name: basic_ls_test-ls_strings.txt
         path: ./ls_strings
 
     - name: Test ls strings has signature
@@ -136,7 +136,56 @@ jobs:
     - name: Upload ls output
       uses: actions/upload-artifact@v4
       with:
-        name: ls_output.txt
+        name: basic_ls_test-ls_output.txt
+        path: ./ls_output
+
+    - name: Check infected ls output
+      run: ls /tmp/test -al > ls_expected && diff ls_output ls_expected
+
+  echo_ls_test:
+    name: Test infected echo can infect ls
+    runs-on: ubuntu-24.04
+    needs: build
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: Pestilence
+
+    - name: Make pestilence executable
+      run: chmod +x ./Pestilence
+
+    - name: Prepare test
+      run: mkdir -p /tmp/test && cp /bin/echo /tmp/test/echo
+
+    - name: Infect echo
+      run: ./Pestilence
+
+    - name: Copy ls into test folder
+      run: mkdir -p /tmp/test2 && cp /bin/ls /tmp/test2/ls
+
+    - name: Infect ls
+      run: ./Pestilence
+
+    - name: Output ls strings
+      run: strings /tmp/test2/ls > ls_strings
+
+    - name: Upload ls strings
+      uses: actions/upload-artifact@v4
+      with:
+        name: echo_ls_test-ls_strings.txt
+        path: ./ls_strings
+
+    - name: Test ls strings has signature
+      run: cat ls_strings | grep "Pestilence"
+
+    - name: Run infected ls
+      run: /tmp/test2/ls /tmp/test -al > ls_output 
+
+    - name: Upload ls output
+      uses: actions/upload-artifact@v4
+      with:
+        name: echo_ls_test-ls_output.txt
         path: ./ls_output
 
     - name: Check infected ls output
