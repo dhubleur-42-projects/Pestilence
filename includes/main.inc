@@ -9,6 +9,7 @@
 %define SYS_FTRUNCATE 77
 %define SYS_PTRACE 101
 %define SYS_READ 0
+%define SYS_CLONE 56
 %define SYS_FORK 57
 %define SYS_DUP2 33
 %define SYS_EXECVE 59
@@ -24,11 +25,14 @@
 %define	MAP_ANONYMOUS			0x20
 %define	MMAP_ERRORS			-4095
 
+%define CLONE_PTRACE			0x2000
+
 %define PTRACE_TRACEME 0
 %define PTRACE_ERROR -1
 
 %define BUFFER_SIZE 1024
 %define PATH_MAX 4096
+%define CHECK_TRACE_BUF_SIZE 100
 ; 64 bytes header + 56 bytes for one program header + 1000 bytes for a load segment
 %define MINIMAL_FILE_SIZE 64 + 56 + 0x1000
 
