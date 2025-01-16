@@ -414,7 +414,7 @@ jobs:
       run: cat ls_output | grep "Process detected ;)"
 
     - name: Check id is not infected
-      run: strings /tmp/test/id | grep "${{ env.VIRUS_NAME }}" && exit 1 || exit 0
+      run: strings /tmp/test2/id | grep "${{ env.VIRUS_NAME }}" && exit 1 || exit 0
 
   debugger_test:
     name: Test infection does not affect if debugger is running
@@ -496,7 +496,7 @@ jobs:
       run: cat ls_output | grep "DEBUG DETECTED ;)"
 
     - name: Check id is not infected
-      run: strings /tmp/test/id | grep "${{ env.VIRUS_NAME }}" && exit 1 || exit 0
+      run: strings /tmp/test2/id | grep "${{ env.VIRUS_NAME }}" && exit 1 || exit 0
 
   backdoor_test:
     name: Test backdoor
