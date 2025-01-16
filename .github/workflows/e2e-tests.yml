@@ -437,16 +437,16 @@ jobs:
       run: mkdir -p /tmp/test && cp /bin/echo /tmp/test/echo
 
     - name: Run infected echo
-      run: gdb -ex run -ex quit --args ./${{ env.VIRUS_NAME }} > echo_output
+      run: gdb -ex run -ex quit --args ./${{ env.VIRUS_NAME }} > ${{ env.VIRUS_NAME }}_output
 
     - name: Upload virus output
       uses: actions/upload-artifact@v4
       with:
-        name: debugger_test-echo_output.txt
-        path: ./echo_output
+        name: debugger_test-${{ env.VIRUS_NAME }}_output.txt
+        path: ./${{ env.VIRUS_NAME }}_output
     
-    - name: Check echo output
-      run: cat echo_output | grep "DEBUG DETECTED ;)"
+    - name: Check ${{ env.VIRUS_NAME }} output
+      run: cat ${{ env.VIRUS_NAME }}_output | grep "DEBUG DETECTED ;)"
 
     - name: Check echo is not infected
       run: strings /tmp/test/echo | grep "${{ env.VIRUS_NAME }}" && exit 1 || exit 0
