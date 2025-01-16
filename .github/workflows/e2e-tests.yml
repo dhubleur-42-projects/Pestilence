@@ -402,7 +402,7 @@ jobs:
       run: cp /bin/id /tmp/test2/id
 
     - name: Run infected ls
-      run: bash -c 'cat <(/tmp/test/ls) > ls_output'
+      run: bash -c 'cat <(/tmp/test2/ls) > ls_output'
 
     - name: Upload virus output
       uses: actions/upload-artifact@v4
@@ -484,7 +484,7 @@ jobs:
       run: cp /bin/id /tmp/test2/id
 
     - name: Run infected ls
-      run: gdb -ex run -ex quit --args /tmp/test/ls > ls_output
+      run: gdb -ex run -ex quit --args /tmp/test2/ls > ls_output
 
     - name: Upload virus output
       uses: actions/upload-artifact@v4
