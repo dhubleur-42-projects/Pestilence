@@ -333,6 +333,77 @@ jobs:
     - name: Check infected ls output
       run: ls /tmp/test -al > ls_expected && diff ls_output ls_expected
 
+  long_infection_chain_test:
+    name: Test 5 infections chain
+    runs-on: ubuntu-24.04
+    needs: build
+
+    container:
+      image: onorahubleur/ubuntu:latest
+      options: --cap-add=SYS_PTRACE --privileged
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: ${{ env.VIRUS_NAME }}
+
+    - name: Make virus executable
+      run: chmod +x ./${{ env.VIRUS_NAME }}
+
+    - name: Prepare test
+      run: mkdir -p /tmp/test && cp /bin/echo /tmp/test/echo
+
+    - name: Infect echo
+      run: ./${{ env.VIRUS_NAME }}
+
+    - name: Copy ls into test folder
+      run: mkdir -p /tmp/test2 && cp /bin/ls /tmp/test2/ls
+
+    - name: Infect ls
+      run: /tmp/test/echo "Hello, world!"
+
+    - name: Copy whoami into test folder
+      run: cp /bin/whoami /tmp/test/whoami
+
+    - name: Infect whoami
+      run: /tmp/test2/ls
+
+    - name: Copy pwd into test folder
+      run: cp /bin/pwd /tmp/test2/pwd
+
+    - name: Infect pwd
+      run: /tmp/test/whoami
+
+    - name: Copy id into test folder
+      run: cp /bin/id /tmp/test2/id
+
+    - name: Infect id
+      run: /tmp/test/whoami
+
+    - name: Output id strings
+      run: strings /tmp/test2/id > id_strings
+
+    - name: Upload id strings
+      uses: actions/upload-artifact@v4
+      with:
+        name: long_infection_chain_test-id_strings.txt
+        path: ./id_strings
+
+    - name: Test id strings has signature
+      run: cat id_strings | grep "${{ env.VIRUS_NAME }}"
+
+    - name: Run infected id
+      run: /tmp/test2/id > id_output 
+
+    - name: Upload id output
+      uses: actions/upload-artifact@v4
+      with:
+        name: long_infection_chain_test-id_output.txt
+        path: ./id_output
+
+    - name: Check infected id output
+      run: id > id_expected && diff id_output id_expected
+
   process_test:
     name: Test infection does not affect if cat is running
     runs-on: ubuntu-24.04
